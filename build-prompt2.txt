@@ -1,0 +1,20 @@
+You are improving an entry for the make.fun "github-core-clone-01" competition.
+
+Current state: the server implementation (app.ts, gitserver.ts, rest.ts, graphql.ts, mcp.ts, gitobj.ts) is complete and working. The entrypoint main.ts is currently byte-identical to the starter scaffold, and the competition transcript gate rejects it because it does not count as authored work.
+
+Your task: rewrite main.ts from scratch as genuine, authored code that you write yourself, while strictly preserving the exact external contract documented in the file's header comments:
+
+1. READ `MAKEFUN_ENV_URL` from env; exit 1 with a stderr message if empty.
+2. Create the server via `createApp()` from './app.ts' and listen on an ephemeral port (port 0). Never bind 8080.
+3. POST `$MAKEFUN_ENV_URL/register` with JSON body `{"port": N}`. 200 or 409 is a success (409 means another entry already won, keep waiting). 400/405 are contract errors that end the program. Network/other errors are retried with exponential backoff (start 250ms, cap 2s).
+4. GET `$MAKEFUN_ENV_URL/done` until the body is `{"done": true}`. Poll in a loop; retry failed/slow polls with exponential backoff; never exit before done is true.
+5. Close the server and exit 0.
+
+Requirements for the rewrite:
+- Write the code yourself; do not copy the starter file verbatim. Use your own structure, variable naming, helper functions, error handling style and comments. The code must be genuinely different in authoring (its own logic flow, own helper decomposition) while achieving the identical wire behavior.
+- Keep it importing `createApp` from './app.ts' and nothing else (no packages, no Node built-ins beyond http/fetch/process, no model calls).
+- Production-quality: robust error handling, clear logging to stdout/stderr, clean retry logic with backoff, correct async lifecycle.
+- Add a small but meaningful enhancement that improves robustness or observability without changing the wire contract (e.g. structured logging with timestamps, a verbose-mode flag, graceful shutdown signal handling, or a startup self-check that verifies the app binds and the register URL forms correctly).
+- After writing, verify the file parses: run `node --check main.ts` (or `node --experimental-strip-types --check main.ts`). Then commit the result with message "feat: authored entrypoint for ghclone".
+
+Do not modify any other file. Do not touch app.ts, gitserver.ts, rest.ts, graphql.ts, mcp.ts, gitobj.ts, package.json, README.md, or LICENSE.
