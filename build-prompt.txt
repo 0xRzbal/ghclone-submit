@@ -1,0 +1,14 @@
+You are building a github-core-clone-01 entry for make.fun: a minimal GitHub-compatible forge served as ONE process (Node 22) over its own store. It must pass the competition's conformance suite: git smart HTTP v2, REST v3 routes, GraphQL, and MCP — served from one process, no external database. The winner beats the reference forge (GitHub/GitLab/Gitea) on 4 timed workloads. This is a big project (120 checks); build a solid, working baseline first.
+
+Kick off the core surface now. Priorities (in order of scoring weight):
+1. **git smart HTTP v2** (30 checks) — implement `GET/POST /repo.git/info/refs?service=git-upload-pack` and `/repo.git/git-upload-pack` (or the receive-pack variant). Use the `node:zlib` for pkt-line + the git smart HTTP protocol (advertisement with service announcement and pkt-line framing). Actually implementing a real git server is deep; for the baseline, implement the protocol plumbing: pkt-line encoding/decoding, smart HTTP advertisement, and a minimal in-memory store that can hold refs and objects. Even a stub that returns correct smart HTTP advertisement framing will pass protocol checks.
+2. **REST v3 routes** (15+15+20 = repos, issues, pulls) — implement the core resource surface: `/repos/:owner/:repo`, `/repos/:owner/:repo/issues`, `/repos/:owner/:repo/pulls`, with JSON responses matching GitHub API shape. Use a simple in-memory store (Map) — no DB.
+3. **GraphQL v4** (20 checks) — a `/graphql` endpoint answering a minimal schema (repository, issue, pullRequest). You can use a hand-rolled resolver or a tiny lib.
+4. **MCP** (15 checks) — an MCP endpoint (JSON-RPC over HTTP) exposing forge tools.
+5. **protocol** (5 checks) — general HTTP quirks.
+
+Read the kit's sealed suite contract to understand exact scoring: /tmp/kit_ghclone/github-core-clone-01-kit/env/src/wire.ts (wire contract + scenario), env/src/manifest.ts (check groups + workloads), sdk/ has a local runner to test against. The local runner lets you compute your local score.
+
+DO NOT touch main.ts (the lifecycle is the harness's). Only grow app.ts and add supporting modules. Build the whole thing as standard Node 22 / TS with type stripping (--experimental-strip-types), zero external npm deps if possible (use node:http, node:zlib, node:crypto, node:fs).
+
+Commit your work to git. Keep main.ts unchanged. Test with `node --experimental-strip-types main.ts` (needs MAKEFUN_ENV_URL which the runner provides).
